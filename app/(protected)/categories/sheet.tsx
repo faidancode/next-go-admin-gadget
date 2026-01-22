@@ -23,10 +23,11 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 export function CategorySheet() {
+  const { open, mode, defaultValues, editingId, close } = useCategorySheet();
+  const isEditMode = mode === "edit";
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const { open, mode, defaultValues, editingId, close } = useCategorySheet();
-
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const form = useForm<CategoryFormValues>({
@@ -40,69 +41,71 @@ export function CategorySheet() {
   const {
     formState: { errors },
     setError,
+    reset,
   } = form;
-
-  const errorInputClass =
-    "border-red-600 focus-visible:border-red-600 focus-visible:ring-destructive/50";
 
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
-
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   useEffect(() => {
     if (open) {
       setSubmitError(null);
-      form.reset({
-        name: defaultValues.name ?? "",
-        imageUrl: defaultValues.imageUrl ?? "",
+      const initialName = defaultValues.name ?? "";
+      const initialUrl = defaultValues.imageUrl ?? "";
+
+      reset({
+        name: initialName,
+        imageUrl: initialUrl,
       });
+      setImagePreview(initialUrl);
+      setImageFile(null);
     }
-  }, [open, defaultValues, form]);
+  }, [open, defaultValues, reset]);
 
   useEffect(() => {
     if (!imageFile) return;
     const objectUrl = URL.createObjectURL(imageFile);
     setImagePreview(objectUrl);
-    return () => {
-      URL.revokeObjectURL(objectUrl);
-    };
+    return () => URL.revokeObjectURL(objectUrl);
   }, [imageFile]);
 
   const handleClose = () => {
+    reset();
     setImageFile(null);
     setImagePreview("");
+    setSubmitError(null);
     close();
   };
-  const getExistingImage = () => defaultValues.imageUrl ?? "";
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0] ?? null;
     if (!file) {
-      const fallback = getExistingImage();
       setImageFile(null);
-      setImagePreview(fallback);
-      form.setValue("imageUrl", fallback);
+      setImagePreview(defaultValues.imageUrl ?? "");
       return;
     }
     setImageFile(file);
-    form.setValue("imageUrl", "");
   };
 
   const onSubmit = async (values: CategoryFormValues) => {
     setSubmitError(null);
 
+    const payload = {
+      ...values,
+      imageFile: imageFile,
+    };
+
     try {
       if (mode === "create") {
-        await createMutation.mutateAsync(values);
+        await createMutation.mutateAsync(payload);
       } else if (mode === "edit" && editingId) {
         await updateMutation.mutateAsync({
           id: editingId,
-          data: values,
+          data: payload,
         });
       }
-
-      close();
+      handleClose();
     } catch (error) {
       const { message, fieldErrors } = resolveFormError(
         error,
@@ -114,74 +117,96 @@ export function CategorySheet() {
       setSubmitError(message);
 
       if (fieldErrors) {
-        for (const [field, value] of Object.entries(fieldErrors)) {
+        Object.entries(fieldErrors).forEach(([field, value]) => {
           setError(field as keyof CategoryFormValues, {
             type: "server",
-            message: Array.isArray(value) ? value.join(", ") : value,
+            message: Array.isArray(value)
+              ? value.join(", ")
+              : (value as string),
           });
-        }
+        });
       }
     }
   };
 
-  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
-    void form.handleSubmit(onSubmit, () =>
-      setSubmitError("Validation failed. Please check your input."),
-    )(event);
-  };
-
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && close()}>
+    <Sheet open={open} onOpenChange={(state) => !state && handleClose()}>
       <SheetContent className="w-full sm:max-w-md p-4">
         <SheetHeader>
           <SheetTitle>
             {mode === "create" ? "Add Category" : "Edit Category"}
           </SheetTitle>
         </SheetHeader>
-        <form className="mt-6 space-y-4" onSubmit={handleFormSubmit}>
+
+        <form
+          className="mt-6 space-y-4"
+          onSubmit={(e) => {
+            void form.handleSubmit(onSubmit)(e);
+          }}
+        >
           {submitError && <Alert variant="error">{submitError}</Alert>}
+
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               placeholder="Category name"
               {...form.register("name")}
-              aria-invalid={!!errors.name}
-              className={cn(errors.name && errorInputClass)}
+              className={cn(errors.name && "border-red-600")}
             />
             {errors.name && (
-              <p className="text-sm text-red-600" role="alert">
-                {errors.name.message}
-              </p>
+              <p className="text-sm text-red-600">{errors.name.message}</p>
             )}
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Logo</Label>
-            <Input
-              type="file"
-              id="imageUrl"
-              placeholder="imageUrl name"
-              {...form.register("imageUrl")}
-              aria-invalid={!!errors.imageUrl}
-              className={cn(errors.imageUrl && errorInputClass)}
-            />
-            {errors.imageUrl && (
-              <p className="text-sm text-red-600" role="alert">
-                {errors.imageUrl.message}
-              </p>
-            )}
+            <Label>Category Image</Label>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded border border-dashed bg-muted/50">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-center text-xs text-muted-foreground">
+                    No image
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  disabled={isSubmitting}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isEditMode
+                    ? "Upload new image to replace current one."
+                    : "Upload category logo/image."}
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2 pt-2">
+
+          <div className="flex gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
-              onClick={close}
+              onClick={handleClose}
               disabled={isSubmitting}
+              className="flex-1"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {mode === "create" ? "Create" : "Update"}
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting
+                ? "Saving..."
+                : isEditMode
+                  ? "Update Category"
+                  : "Create Category"}
             </Button>
           </div>
         </form>

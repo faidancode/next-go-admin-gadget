@@ -69,6 +69,7 @@ async function apiFetch(
   path: string,
   options: ApiRequestInit & { __retry?: boolean } = {},
 ) {
+  const isRefreshPath = path === "/auth/refresh";
   const res = await fetch(`/api${path}`, {
     credentials: "include",
     cache: "no-store",
@@ -86,6 +87,11 @@ async function apiFetch(
       return apiFetch(path, {
         ...options,
         __retry: true, // ⛔ prevent infinite loop
+      });
+    } else {
+      throw new ApiError(401, "Session expired", {
+        shouldLogout: true,
+        isSessionExpired: true,
       });
     }
   }

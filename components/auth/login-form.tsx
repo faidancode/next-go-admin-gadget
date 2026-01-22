@@ -22,7 +22,7 @@ import { apiRequest, unwrapEnvelope } from "@/lib/api/fetcher";
 import { cn } from "@/lib/utils";
 import { LoginFormValues } from "@/lib/validations/auth-schema";
 import { AuthMeData, AuthUser } from "@/types";
-import { ShieldAlert, UserCheck } from "lucide-react";
+import { Eye, EyeOff, ShieldAlert, UserCheck } from "lucide-react";
 import Image from "next/image";
 
 type LoginFormProps = React.ComponentProps<"div"> & {
@@ -50,6 +50,7 @@ export function LoginForm({
       password: "",
     },
   });
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const [loginError, setLoginError] = React.useState<string | null>(null);
 
@@ -65,32 +66,26 @@ export function LoginForm({
 
     onSuccess: async (loginRes) => {
       setLoginError(null);
-      console.log("suks");
 
       // 1️⃣ Pastikan login benar-benar sukses (envelope-level)
       unwrapEnvelope(loginRes, "Login failed");
 
       // 2️⃣ Ambil data user (auth/me)
       try {
-        console.log("me");
         const me = unwrapEnvelope(
           await apiRequest<AuthMeData>("/auth/me"),
           "Unauthorized",
         );
-        
-        console.log("me2");
+
         const authUser: AuthUser = {
           id: me.userId,
           role: me.role,
           name: me.name,
           email: me.email,
         };
-        console.log("me3");
-        
+
         // 3️⃣ Hydrate auth store
         login(authUser);
-        console.log("me4");
-        console.log({ authUser });
         // 4️⃣ Redirect
         if (onLoginSuccess) {
           onLoginSuccess();
@@ -181,13 +176,22 @@ export function LoginForm({
                     Forgot your password?
                   </a> */}
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  {...register("password", { required: true })}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    {...register("password", { required: true })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:cursor-pointer transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </Field>
 
               <Field>

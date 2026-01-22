@@ -16,14 +16,21 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, hasHydrated, isValidating, login, logout, setValidating } =
-    useAuthStore();
+  const {
+    user,
+    hasHydrated,
+    isValidating,
+    login,
+    logout,
+    isLoggingOut,
+    setValidating,
+  } = useAuthStore();
 
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!hasHydrated || isValidating || user) return;
+    if (!hasHydrated || isValidating || user || isLoggingOut) return;
 
     setValidating(true);
 

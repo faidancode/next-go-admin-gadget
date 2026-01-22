@@ -26,7 +26,6 @@ export function BrandSheet() {
   const { open, mode, defaultValues, editingId, close } = useBrandSheet();
   const isEditMode = mode === "edit";
 
-  // State untuk file mentah dan preview
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -49,10 +48,8 @@ export function BrandSheet() {
   const updateMutation = useUpdateBrand();
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  // Sync Form saat Sheet terbuka
   useEffect(() => {
     if (open) {
-      console.log("open");
       setSubmitError(null);
       const initialName = defaultValues.name ?? "";
       const initialUrl = defaultValues.imageUrl ?? "";
@@ -61,8 +58,6 @@ export function BrandSheet() {
         name: initialName,
         imageUrl: initialUrl,
       });
-      console.log(defaultValues);
-      console.log(initialUrl);
 
       // Set preview ke image yang sudah ada dari database
       setImagePreview(initialUrl);
@@ -70,7 +65,6 @@ export function BrandSheet() {
     }
   }, [open, defaultValues, reset]);
 
-  // Handle Object URL untuk preview file baru
   useEffect(() => {
     if (!imageFile) return;
     const objectUrl = URL.createObjectURL(imageFile);

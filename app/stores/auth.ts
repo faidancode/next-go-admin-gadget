@@ -13,6 +13,7 @@ export type AuthState = {
   user: AuthUser | null;
   hasHydrated: boolean;
   isValidating: boolean;
+  isLoggingOut: boolean;
 
   /** derived */
   isAuthenticated: () => boolean;
@@ -20,6 +21,7 @@ export type AuthState = {
   login: (user: AuthUser) => void;
   logout: () => void;
   setHydrated: () => void;
+  setLoggingOut: (isLoggingOut: boolean) => void;
   setValidating: (val: boolean) => void;
 };
 
@@ -29,12 +31,14 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       hasHydrated: false,
       isValidating: false,
+      isLoggingOut: false,
 
       // ✅ DERIVED STATE (single source of truth)
       isAuthenticated: () => Boolean(get().user),
 
       login: (user) => set({ user }),
       logout: () => set({ user: null }),
+      setLoggingOut: (isLoggingOut) => set({ isLoggingOut }),
       setHydrated: () => set({ hasHydrated: true }),
       setValidating: (val) => set({ isValidating: val }),
     }),
