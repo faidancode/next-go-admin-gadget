@@ -5,29 +5,29 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 import {
-  BookOpen,
-  CreditCard,
-  Grid2X2,
-  LayoutDashboard,
-  PenTool,
-  ShieldUser,
-  Users,
-} from "lucide-react";
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  BadgeCheck,
+  ChartArea,
+  LayoutGrid,
+  ReceiptText,
+  ShieldUser,
+  TabletSmartphone,
+  Users
+} from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /* Config */
 const SIDEBAR_ITEMS = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Categories", url: "/categories", icon: Grid2X2 },
-  { title: "Authors", url: "/authors", icon: PenTool },
-  { title: "Books", url: "/books", icon: BookOpen },
+  { title: "Dashboard", url: "/dashboard", icon: ChartArea },
+  { title: "Categories", url: "/categories", icon: LayoutGrid },
+  { title: "Brands", url: "/brands", icon: BadgeCheck },
+  { title: "Products", url: "/products", icon: TabletSmartphone },
   { title: "Customers", url: "/customers", icon: Users },
-  { title: "Orders", url: "/orders", icon: CreditCard },
+  { title: "Orders", url: "/orders", icon: ReceiptText },
   {
     title: "Admin",
     url: "/admin",
@@ -62,20 +62,20 @@ export function SidebarNav() {
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
               asChild
-              className={`my-1 p-5 transition-all rounded-none ${
+              className={`my-1 p-5 transition-all border-l-4  rounded-none ${
                 active
-                  ? "bg-secondary/5 border-l-4 border-secondary"
-                  : "hover:bg-primary-50 text-gray-700"
+                  ? "bg-primary/10 border-primary"
+                  : "hover:bg-primary-50 border-white text-gray-600"
               }`}
             >
               <a href={item.url} className="flex items-center gap-3">
                 <item.icon
                   size={22}
-                  className={active ? "text-secondary" : "text-gray-700"}
+                  className={active ? "text-primary" : "text-gray-600"}
                 />
                 <span
                   className={`text-base font-semibold ${
-                    active ? "text-secondary" : "text-gray-600"
+                    active ? "text-primary" : "text-gray-500"
                   }`}
                 >
                   {item.title}

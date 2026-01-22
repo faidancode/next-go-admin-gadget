@@ -1,22 +1,21 @@
 "use client";
 
 import { useAuthStore } from "@/app/stores/auth";
-import { apiRequest } from "@/lib/api/fetcher";
-import { useRouter } from "next/navigation";
-import React from "react";
-import {
-  SidebarFooter,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuSubButton,
-} from "@/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuSubButton
+} from "@/components/ui/sidebar";
+import { apiRequest } from "@/lib/api/fetcher";
 import { ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 export const SidebarUser = React.memo(() => {
   const router = useRouter();

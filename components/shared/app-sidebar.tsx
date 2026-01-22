@@ -26,7 +26,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem className="p-2 flex items-center">
             <Image src="/logo.svg" alt="logo" height={28} width={28} />
-            <p className="ml-2 font-bold text-2xl text-primary">Faibook</p>
+            <p className="ml-2 font-bold text-2xl">GoGadget</p>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
