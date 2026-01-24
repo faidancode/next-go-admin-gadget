@@ -10,14 +10,5 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, hasHydrated } = useAuthStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (hasHydrated && user) {
-      router.replace("/dashboard");
-    }
-  }, [hasHydrated, user, router]);
-
   return children;
 }

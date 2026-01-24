@@ -14,12 +14,14 @@ export type AuthState = {
   hasHydrated: boolean;
   isValidating: boolean;
   isLoggingOut: boolean;
+  isSessionExpired: boolean; // 🆕 GLOBAL KILL SWITCH
 
   /** derived */
   isAuthenticated: () => boolean;
 
   login: (user: AuthUser) => void;
   logout: () => void;
+  markSessionExpired: () => void; // 🆕
   setHydrated: () => void;
   setLoggingOut: (isLoggingOut: boolean) => void;
   setValidating: (val: boolean) => void;
@@ -32,12 +34,28 @@ export const useAuthStore = create<AuthState>()(
       hasHydrated: false,
       isValidating: false,
       isLoggingOut: false,
+      isSessionExpired: false,
 
-      // ✅ DERIVED STATE (single source of truth)
       isAuthenticated: () => Boolean(get().user),
 
-      login: (user) => set({ user }),
-      logout: () => set({ user: null }),
+      login: (user) =>
+        set({
+          user,
+          isSessionExpired: false, // reset on login
+        }),
+
+      logout: () =>
+        set({
+          user: null,
+          isLoggingOut: false,
+        }),
+
+      markSessionExpired: () =>
+        set({
+          isSessionExpired: true,
+          user: null,
+        }),
+
       setLoggingOut: (isLoggingOut) => set({ isLoggingOut }),
       setHydrated: () => set({ hasHydrated: true }),
       setValidating: (val) => set({ isValidating: val }),

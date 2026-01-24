@@ -29,7 +29,6 @@ function BrandPage() {
   );
 
   const tableData = data?.data ?? [];
-  console.log({ tableData });
   const totalPages = data?.meta?.totalPages ?? 1;
 
   const deleteMutation = useDeleteBrand();

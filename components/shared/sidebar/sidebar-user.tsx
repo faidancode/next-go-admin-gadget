@@ -10,7 +10,7 @@ import {
 import {
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuSubButton
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { apiRequest } from "@/lib/api/fetcher";
 import { ChevronRight } from "lucide-react";
@@ -35,7 +35,7 @@ export const SidebarUser = React.memo(() => {
       useAuthStore.getState().logout();
       localStorage.removeItem("auth-storage");
       sessionStorage.removeItem("auth-validated");
-      router.replace("/login");
+      window.location.replace("/login");
     }
   }
 

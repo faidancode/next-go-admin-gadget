@@ -6,10 +6,6 @@ import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api/fetcher";
 import { useAuthStore } from "@/app/stores/auth";
 
-interface Props {
-  children: React.ReactNode;
-}
-
 function isSessionExpiredError(error: unknown): boolean {
   return (
     error instanceof ApiError &&
@@ -19,74 +15,73 @@ function isSessionExpiredError(error: unknown): boolean {
   );
 }
 
-export default function QueryProvider({ children }: Props) {
+export default function QueryProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
+
+  const {
+    logout,
+    isSessionExpired,
+    markSessionExpired,
+    isLoggingOut,
+    setLoggingOut,
+  } = useAuthStore();
 
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            retry: (failureCount, error) => {
-              if (error instanceof ApiError) {
-                const status = error.status;
-
-                // ⛔ semua client error langsung gagal
-                if (status >= 400 && status < 500) {
-                  return false;
-                }
+            retry: (count, error) => {
+              if (
+                error instanceof ApiError &&
+                error.status >= 400 &&
+                error.status < 500
+              ) {
+                return false;
               }
-
-              // ✅ hanya network / 5xx
-              return failureCount < 3;
+              return count < 3;
             },
-
-            staleTime: 1000 * 60,
+            staleTime: 60_000,
           },
           mutations: {
-            retry: (failureCount, error) => {
-              if (error instanceof ApiError) {
-                const status = error.status;
-
-                // ⛔ semua client error langsung gagal
-                if (status >= 400 && status < 500) {
-                  return false;
-                }
-              }
-
-              // ✅ hanya network / 5xx
-              return failureCount < 3;
-            },
+            retry: false,
           },
         },
       }),
   );
 
   const handleSessionExpired = async () => {
-    logout();
+    if (isLoggingOut) return;
+
+    setLoggingOut(true);
+    markSessionExpired();
 
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch {
+      // ignore
     } finally {
-      router.push("/login");
+      logout();
+      router.replace("/login");
+      setLoggingOut(false);
     }
   };
 
   useEffect(() => {
-    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
-      if (event.type === "updated") {
-        const error = event.query.state.error;
-        if (error && isSessionExpiredError(error)) {
-          handleSessionExpired();
-        }
+    return queryClient.getQueryCache().subscribe((event) => {
+      if (event.type !== "updated") return;
+
+      const error = event.query.state.error;
+
+      if (error && isSessionExpiredError(error) && !isSessionExpired) {
+        handleSessionExpired();
       }
     });
-
-    return unsubscribe;
-  }, [queryClient, router, logout]);
+  }, [queryClient, isSessionExpired]);
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

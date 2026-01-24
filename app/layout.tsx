@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/shared/query-provider";
+import AuthBootstrapProvider from "@/components/shared/auth-bootstrap-provider";
 
 export const metadata: Metadata = {
   title: "Admin GoGadget",
-  description: "Bookstore",
+  description: "Admin GoGadget",
 };
 
 const poppins = Poppins({
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={poppins.className}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <AuthBootstrapProvider>{children}</AuthBootstrapProvider>
+        </QueryProvider>
       </body>
     </html>
   );

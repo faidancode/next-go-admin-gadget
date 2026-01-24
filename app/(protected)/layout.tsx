@@ -1,9 +1,6 @@
-// app/(protected)/layout.tsx
 "use client";
 
-import { apiRequest, unwrapEnvelope } from "@/lib/api/fetcher";
-import { AuthMeData } from "@/types";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuthStore } from "../stores/auth";
 import { ADMIN_ROLES } from "@/constants/roles";
@@ -16,58 +13,25 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const {
-    user,
-    hasHydrated,
-    isValidating,
-    login,
-    logout,
-    isLoggingOut,
-    setValidating,
-  } = useAuthStore();
+  const { user, hasHydrated, isValidating, isSessionExpired } = useAuthStore();
 
   const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (!hasHydrated || isValidating || user || isLoggingOut) return;
-
-    setValidating(true);
-
-    apiRequest<AuthMeData>("/auth/me")
-      .then((res) => {
-        const me = unwrapEnvelope(res);
-
-        login({
-          id: me.userId,
-          name: me.name,
-          email: me.email,
-          role: me.role,
-        });
-      })
-      .catch(() => {
-        logout();
-        router.replace("/login");
-      })
-      .finally(() => {
-        setValidating(false);
-      });
-  }, [hasHydrated, isValidating, user]);
 
   useEffect(() => {
     if (!hasHydrated || isValidating) return;
 
-    // belum login
-    if (!user) {
+    if (!user || isSessionExpired) {
       router.replace("/login");
       return;
     }
 
-    // role tidak diizinkan
-    if (!ADMIN_ROLES.includes(user.role!)) {
+    if (!ADMIN_ROLES.includes(user.role)) {
       router.replace("/login");
+      return;
     }
-  }, [hasHydrated, isValidating, user, router]);
+  }, [hasHydrated, isValidating, user, isSessionExpired]);
+
+  if (!hasHydrated || isValidating) return null;
 
   return (
     <SidebarProvider>

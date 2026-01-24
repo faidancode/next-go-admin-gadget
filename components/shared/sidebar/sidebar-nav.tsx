@@ -71,11 +71,11 @@ export function SidebarNav() {
               <a href={item.url} className="flex items-center gap-3">
                 <item.icon
                   size={22}
-                  className={active ? "text-primary" : "text-gray-600"}
+                  className={active ? "text-primary" : "text-gray-400"}
                 />
                 <span
                   className={`text-base font-semibold ${
-                    active ? "text-primary" : "text-gray-500"
+                    active ? "text-primary" : "text-gray-400"
                   }`}
                 >
                   {item.title}
