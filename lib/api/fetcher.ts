@@ -163,7 +163,7 @@ export function unwrapEnvelope<T>(
   envelope: ApiEnvelope<T>,
   fallback = "Request failed",
 ): T {
-  if (envelope.success) return envelope.data;
+  if (envelope.ok) return envelope.data;
 
   const message =
     typeof envelope.error?.message === "string"

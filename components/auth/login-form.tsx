@@ -66,7 +66,7 @@ export function LoginForm({
 
     onSuccess: async (loginRes) => {
       setLoginError(null);
-
+      console.log({ loginRes });
       // 1️⃣ Pastikan login benar-benar sukses (envelope-level)
       unwrapEnvelope(loginRes, "Login failed");
 
