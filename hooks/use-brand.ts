@@ -19,7 +19,7 @@ export const useBrands = (
   sort: string,
 ) => {
   return useQuery({
-    queryKey: ["categories", page, pageSize, search, sort], // Pastikan queryKey berubah saat page/search berubah
+    queryKey: ["brands", page, pageSize, search, sort], // Pastikan queryKey berubah saat page/search berubah
     queryFn: () => getBrands(page, pageSize, search, sort),
     staleTime: 1000 * 60,
   });
@@ -40,7 +40,7 @@ export const useCreateBrand = () => {
       return createBrand(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["brands"] });
       toast.success("Brand created successfully");
     },
     onError: (error) => {
@@ -65,7 +65,7 @@ export const useUpdateBrand = () => {
       return updateBrand(id, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["brands"] });
       toast.success("Brand updated successfully");
     },
     // onerror
@@ -84,7 +84,7 @@ export const useDeleteBrand = () => {
   return useMutation({
     mutationFn: deleteBrand,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["brands"] });
       toast.success("Brand deleted successfully");
     },
     onError: (error) => {
