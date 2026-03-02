@@ -18,6 +18,7 @@ import {
   TabletSmartphone,
   Users
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
 /* Config */
@@ -54,7 +55,7 @@ export function SidebarNav() {
   }, [role]);
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="gap-1.5">
       {visibleItems.map((item) => {
         const active = isActive(item.url);
 
@@ -62,24 +63,31 @@ export function SidebarNav() {
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
               asChild
-              className={`my-1 p-5 transition-all border-l-4  rounded-none ${
+              className={cn(
+                "relative h-12 px-4 rounded-xl transition-all duration-300 group",
                 active
-                  ? "bg-primary/10 border-primary"
-                  : "hover:bg-primary-50 border-white text-gray-600"
-              }`}
+                  ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
+                  : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+              )}
             >
-              <a href={item.url} className="flex items-center gap-3">
-                <item.icon
-                  size={22}
-                  className={active ? "text-primary" : "text-gray-400"}
-                />
-                <span
-                  className={`text-base font-semibold ${
-                    active ? "text-primary" : "text-gray-400"
-                  }`}
-                >
+              <a href={item.url} className="flex items-center gap-3 w-full">
+                <div className={cn(
+                  "p-1.5 rounded-lg transition-colors",
+                  active ? "bg-white/10 text-primary" : "text-slate-400 group-hover:text-slate-900"
+                )}>
+                  <item.icon size={18} strokeWidth={active ? 2.5 : 2} />
+                </div>
+
+                <span className={cn(
+                  "text-sm font-bold tracking-tight transition-all",
+                  active ? "translate-x-0.5" : "group-hover:translate-x-0.5"
+                )}>
                   {item.title}
                 </span>
+
+                {active && (
+                  <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                )}
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
