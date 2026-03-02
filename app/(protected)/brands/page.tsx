@@ -17,13 +17,13 @@ function BrandPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300); // 300ms delay
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState("createdAt:desc"); // default
 
   // Fetch data dengan pagination & search
   const { data, isLoading, error } = useBrands(
     page,
-    pageSize,
+    limit,
     debouncedSearch,
     sort,
   );
@@ -61,7 +61,7 @@ function BrandPage() {
         ) : (
           <div>
             <DataTable
-              key={`${page}-${pageSize}`}
+              key={`${page}-${limit}`}
               columns={columns(handleDelete, (brand) => {
                 openEdit({
                   id: brand.id,
@@ -73,8 +73,8 @@ function BrandPage() {
               data={tableData}
               page={page}
               setPage={setPage}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
+              limit={limit}
+              setLimit={setLimit}
               totalPages={totalPages}
               sort={sort}
               setSort={setSort}

@@ -14,13 +14,13 @@ import { BrandFormValues } from "@/lib/validations/brand-schema";
 // ✅ Hook untuk mendapatkan daftar kategori
 export const useBrands = (
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort: string,
 ) => {
   return useQuery({
-    queryKey: ["brands", page, pageSize, search, sort], // Pastikan queryKey berubah saat page/search berubah
-    queryFn: () => getBrands(page, pageSize, search, sort),
+    queryKey: ["brands", page, limit, search, sort], // Pastikan queryKey berubah saat page/search berubah
+    queryFn: () => getBrands(page, limit, search, sort),
     staleTime: 1000 * 60,
   });
 };

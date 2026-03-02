@@ -18,12 +18,12 @@ function ProductPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState("createdAt:desc");
 
   const { data, isLoading, error } = useProducts(
     page,
-    pageSize,
+    limit,
     debouncedSearch,
     sort,
   );
@@ -61,7 +61,7 @@ function ProductPage() {
           <SkeletonTable />
         ) : (
           <DataTable
-            key={`${page}-${pageSize}`}
+            key={`${page}-${limit}`}
             columns={columns(handleDelete, (product) => {
               openEdit({
                 id: product.id,
@@ -79,8 +79,8 @@ function ProductPage() {
             data={tableData}
             page={page}
             setPage={setPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
+            limit={limit}
+            setLimit={setLimit}
             totalPages={totalPages}
             sort={sort}
             setSort={setSort}

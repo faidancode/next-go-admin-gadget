@@ -14,13 +14,13 @@ import { CategoryFormValues } from "@/lib/validations/category-schema";
 // ✅ Hook untuk mendapatkan daftar kategori
 export const useCategories = (
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort: string,
 ) => {
   return useQuery({
-    queryKey: ["categories", page, pageSize, search, sort], // Pastikan queryKey berubah saat page/search berubah
-    queryFn: () => getCategories(page, pageSize, search, sort),
+    queryKey: ["categories", page, limit, search, sort], // Pastikan queryKey berubah saat page/search berubah
+    queryFn: () => getCategories(page, limit, search, sort),
     staleTime: 1000 * 60,
   });
 };

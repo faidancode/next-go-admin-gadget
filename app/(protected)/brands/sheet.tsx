@@ -20,7 +20,7 @@ import {
   type BrandFormValues,
 } from "@/lib/validations/brand-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, Loader2, ShieldAlert, Tag } from "lucide-react";
+import { BadgeCheck, ImagePlus, Loader2, ShieldAlert, Tag } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -138,7 +138,7 @@ export function BrandSheet() {
         <SheetHeader className="p-8 border-b border-slate-50 bg-white">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-primary shadow-inner">
-              <Tag size={24} />
+              <BadgeCheck size={24} />
             </div>
             <div>
               <SheetTitle className="text-xl font-black tracking-tight uppercase">

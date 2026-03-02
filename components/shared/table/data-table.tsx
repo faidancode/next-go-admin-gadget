@@ -24,8 +24,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   page: number; // Add page prop
   setPage: (page: number) => void;
-  pageSize: number; // Add pageSize prop
-  setPageSize: (pageSize: number) => void;
+  limit: number; // Add limit prop
+  setLimit: (limit: number) => void;
   totalPages: number; // Add page prop
   sort: string;
   setSort: (sort: string) => void;
@@ -36,8 +36,8 @@ export function DataTable<TData, TValue>({
   data,
   page, // Destructure page
   setPage, // Destructure setPage
-  pageSize, // Destructure Limit
-  setPageSize, // Destructure setPageSize
+  limit, // Destructure Limit
+  setLimit, // Destructure setLimit
   totalPages,
   sort,
   setSort,
@@ -47,8 +47,14 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
     manualSorting: true,
+    pageCount: totalPages,
     state: {
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
       sorting: sort
         ? [
           {
@@ -141,8 +147,8 @@ export function DataTable<TData, TValue>({
         table={table}
         page={page}
         setPage={setPage}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
+        limit={limit}
+        setLimit={setLimit}
         totalPages={totalPages}
       />
     </div>

@@ -67,14 +67,14 @@ function buildProductFormData(
 
 export async function getProducts(
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort: string,
 ): Promise<ProductListResponse> {
   const { sortBy, sortDir } = normalizeSort(sort);
   const query = buildQueryString({
     page,
-    limit: pageSize,
+    limit: limit,
     search,
     sort_by: sortBy,
     sort_dir: sortDir,

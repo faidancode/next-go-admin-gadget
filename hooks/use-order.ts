@@ -14,13 +14,13 @@ import { getErrorMessage, getReadableErrorCode } from "@/lib/api/errors";
 export const useOrders = (
   status: string,
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort?: string
 ) => {
   return useQuery<OrderListResponse>({
-    queryKey: ["admin-orders", { status, page, pageSize, search, sort }],
-    queryFn: () => getOrders(status, page, pageSize, search, sort),
+    queryKey: ["admin-orders", { status, page, limit, search, sort }],
+    queryFn: () => getOrders(status, page, limit, search, sort),
     placeholderData: (prev) => prev,
     staleTime: 1000 * 60,
   });

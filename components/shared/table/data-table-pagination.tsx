@@ -18,22 +18,22 @@ import {
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
-  setPageSize?: (pageSize: number) => void;
-  pageSize: number;
-  setPage?: (pageSize: number) => void;
+  setLimit?: (limit: number) => void;
+  limit: number;
+  setPage?: (limit: number) => void;
   page: number;
   totalPages: number;
 }
 
 export function DataTablePagination<TData>({
   table,
-  pageSize,
-  setPageSize,
+  limit,
+  setLimit,
   page,
   setPage,
   totalPages,
 }: DataTablePaginationProps<TData> & {
-  setPageSize?: (newLimit: number) => void;
+  setLimit?: (newLimit: number) => void;
   setPage?: (newPage: number) => void;
 }) {
   const canPreviousPage = page > 1 ? true : false;
@@ -44,9 +44,9 @@ export function DataTablePagination<TData>({
         <div className="flex items-center gap-2">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Show</p>
           <Select
-            value={String(pageSize)}
+            value={String(limit)}
             onValueChange={(v) => {
-              setPageSize?.(Number(v));
+              setLimit?.(Number(v));
               setPage?.(1);
             }}
           >

@@ -51,11 +51,11 @@ function buildBrandFormData(data: BrandPayloadWithFile): FormData {
 
 export async function getBrands(
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort: string,
 ): Promise<BrandListResponse> {
-  const query = buildQueryString({ page, pageSize, search, sort });
+  const query = buildQueryString({ page, limit, search, sort });
   const path = query ? `/admin/brands?${query}` : "/admin/brands";
 
   const envelope = await apiRequest<Brand[]>(path);
@@ -98,8 +98,8 @@ export async function updateBrand(
 
   const envelope = hasFile
     ? await apiRequest<Brand>(`/admin/brands/${id}`, buildBrandFormData(data), {
-        method: "PATCH",
-      })
+      method: "PATCH",
+    })
     : await apiRequest<Brand>(`/admin/brands/${id}`, data, { method: "PATCH" });
 
   return unwrapEnvelope(envelope, "Failed to update brand");

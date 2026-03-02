@@ -16,13 +16,13 @@ type ProductPayload = ProductFormValues & {
 
 export const useProducts = (
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort: string,
 ) => {
   return useQuery({
-    queryKey: ["products", page, pageSize, search, sort],
-    queryFn: () => getProducts(page, pageSize, search, sort),
+    queryKey: ["products", page, limit, search, sort],
+    queryFn: () => getProducts(page, limit, search, sort),
     staleTime: 1000 * 60,
   });
 };

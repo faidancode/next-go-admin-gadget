@@ -51,11 +51,11 @@ function buildCategoryFormData(data: CategoryPayloadWithFile): FormData {
 
 export async function getCategories(
   page: number,
-  pageSize: number,
+  limit: number,
   search: string,
   sort: string,
 ): Promise<CategoryListResponse> {
-  const query = buildQueryString({ page, pageSize, search, sort });
+  const query = buildQueryString({ page, limit, search, sort });
   const path = query ? `/admin/categories?${query}` : "/admin/categories";
 
   const envelope = await apiRequest<Category[]>(path);
@@ -100,15 +100,15 @@ export async function updateCategory(
 
   const envelope = hasFile
     ? await apiRequest<Category>(
-        `/admin/categories/${id}`,
-        buildCategoryFormData(data),
-        {
-          method: "PATCH",
-        },
-      )
-    : await apiRequest<Category>(`/admin/categories/${id}`, data, {
+      `/admin/categories/${id}`,
+      buildCategoryFormData(data),
+      {
         method: "PATCH",
-      });
+      },
+    )
+    : await apiRequest<Category>(`/admin/categories/${id}`, data, {
+      method: "PATCH",
+    });
 
   return unwrapEnvelope(envelope, "Failed to update category");
 }

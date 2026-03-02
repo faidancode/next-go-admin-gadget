@@ -22,11 +22,11 @@ const toDate = (value?: Date | string | null) =>
 export async function getOrders(
     status = "PAID",
     page = 1,
-    pageSize = 10,
+    limit = 10,
     search = "",
     sort = "placedAt:desc"
 ): Promise<OrderListResponse> {
-    const query = buildQueryString({ status, page, pageSize, search, sort });
+    const query = buildQueryString({ status, page, limit, search, sort });
     const path = query ? `/admin/orders?${query}` : "/admin/orders";
     const envelope = await apiRequest<OrderRow[]>(path);
     const data = unwrapEnvelope(envelope, "Failed to fetch orders");

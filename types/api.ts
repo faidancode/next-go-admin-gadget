@@ -7,7 +7,7 @@ export type ApiEnvelope<T> = {
 
 export type PaginationMeta = {
   page?: number;
-  pageSize?: number;
+  limit?: number;
   total?: number;
   totalPages?: number;
   [key: string]: unknown;
