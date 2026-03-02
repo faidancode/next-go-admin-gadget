@@ -18,7 +18,7 @@ import {
   useUpdateOrder,
 } from "@/hooks/use-order";
 import { useOrderSheet } from "@/hooks/use-order-sheet";
-import { Loader2 } from "lucide-react";
+import { Box, ImageIcon, Loader2, Package, Settings2, StickyNote, User, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { DefaultImage } from "@/components/shared/default-image";
@@ -94,142 +94,189 @@ export function OrderSheet() {
 
   return (
     <UISheet open={open} onOpenChange={(o) => !o && close()}>
-      <SheetContent className="w-full sm:max-w-xl p-4 sm:p-6 max-h-screen overflow-y-auto">
-        <SheetHeader className="p-0">
-          <SheetTitle className="text-xl">
-            {mode === "edit" ? "Edit Order" : "Order Detail"}
-          </SheetTitle>
-          <div className="flex flex-col gap-1">
-            <span className="font-mono text-sm">
-              {detail?.orderNumber ? `#${detail.orderNumber}` : ""}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Placed at {formatDate(detail?.placedAt ?? defaults.createdAt)}
-            </span>
+      <SheetContent className="w-full sm:max-w-xl p-0 flex flex-col h-full border-none rounded-l-[2rem]">
+        {/* Header Section dengan Glassmorphism style */}
+        <SheetHeader className="p-8 pb-6 border-b border-slate-50 bg-white/50 backdrop-blur-md sticky top-0 z-10">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <SheetTitle className="text-2xl font-black tracking-tighter uppercase text-slate-900">
+                {mode === "edit" ? "Edit Order" : "Order Detail"}
+              </SheetTitle>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs font-bold px-2 py-1 bg-slate-100 rounded-lg text-slate-600">
+                  {detail?.orderNumber ? `#${detail.orderNumber}` : ""}
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  {formatDate(detail?.placedAt ?? defaults.createdAt)}
+                </span>
+              </div>
+            </div>
+            {detail && <StatusBadge status={detail?.status} className="rounded-xl px-4 py-2 font-black uppercase text-[9px] tracking-[0.15em]" />}
           </div>
-          {detail && (
-            <StatusBadge status={detail?.status} />
-          )}
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
-          {/* Section: Customer */}
-          <div className="space-y-2">
-            <p className="text-sm font-semibold">Customer Information</p>
-            <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
-              {/* Di Go kita pakai userId, jika ingin email/nama perlu join di Backend */}
-              <InfoRow label="User ID" value={detail?.userId} />
-              <InfoRow label="Note" value={detail?.note} />
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-10 no-scrollbar">
+
+          {/* Section: Customer & Shipping */}
+          <section className="space-y-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2">
+              <User size={14} /> Customer & Shipping Info
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-black text-slate-900">{detail?.address?.recipientName || "Unknown User"}</p>
+                    <p className="text-xs font-bold text-slate-400">{detail?.address?.recipientPhone || detail?.userId}</p>
+                  </div>
+                  <span className="px-2 py-1 rounded-md bg-white border border-slate-200 text-[9px] font-black uppercase text-slate-400">
+                    {detail?.address?.label || "Home"}
+                  </span>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200/50">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Delivery Address</p>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    {detail?.address?.street}, {detail?.address?.subdistrict}, {detail?.address?.district}<br />
+                    {detail?.address?.city}, {detail?.address?.province} - {detail?.address?.postalCode}
+                  </p>
+                </div>
+
+                {detail?.note && (
+                  <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-100/50 flex gap-2">
+                    <StickyNote size={14} className="text-amber-500 shrink-0" />
+                    <p className="text-[11px] text-amber-700 italic font-medium">"{detail.note}"</p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </section>
 
           {/* Section: Items */}
-          <div className="space-y-3">
-            <p className="text-sm font-semibold">Ordered Items</p>
-            <div className="rounded-lg border divide-y bg-muted/20">
-              {items.length === 0 ? (
-                <p className="p-4 text-center text-sm text-muted-foreground">No items.</p>
-              ) : (
-                items.map((item) => (
-                  <div key={item.id} className="p-3 flex gap-3 items-center">
-                    <div className="relative h-14 w-12 shrink-0">
-                      {item.productImageUrl ? (
-                        <Image
-                          src={item.productImageUrl}
-                          alt={item.nameSnapshot}
-                          fill
-                          className="object-cover rounded border"
-                        />
-                      ) : (
-                        <DefaultImage className="w-full h-full rounded-lg" logoOnly logoSize={20} />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{item.nameSnapshot}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.quantity} x {formatCurrency(item.unitPrice)}
-                      </p>
-                    </div>
-                    <div className="text-sm font-semibold text-right">
-                      {formatCurrency(item.subtotal)}
-                    </div>
-                  </div>
-                ))
-              )}
+          <section className="space-y-4">
+            <div className="flex justify-between items-end">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2">
+                <Package size={14} /> Ordered Items
+              </h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">{items.length} Items</span>
             </div>
 
-            {/* Summary Price */}
-            <div className="space-y-1.5 px-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Price</span>
-                <span className="font-bold text-primary">
+            <div className="rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm">
+              {items.length === 0 ? (
+                <div className="p-10 text-center space-y-2">
+                  <Box className="mx-auto text-slate-200" size={32} />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No items in this order</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-50">
+                  {items.map((item) => (
+                    <div key={item.id} className="p-4 flex gap-4 items-center hover:bg-slate-50/50 transition-colors">
+                      <div className="relative h-16 w-14 shrink-0 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+                        {item.productImageUrl ? (
+                          <Image src={item.productImageUrl} alt={item.nameSnapshot} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={20} /></div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-black text-slate-900 uppercase truncate leading-tight mb-1">{item.nameSnapshot}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                          {item.quantity} Unit <span className="mx-1">•</span> {formatCurrency(item.unitPrice)}
+                        </p>
+                      </div>
+                      <div className="text-xs font-black text-slate-900">
+                        {formatCurrency(item.subtotal)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Total Footer inside Items Box */}
+              <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Grand Total</span>
+                <span className="text-lg font-black text-primary tracking-tighter">
                   {formatCurrency(detail?.totalPrice)}
                 </span>
               </div>
             </div>
-          </div>
+          </section>
 
-          <Separator />
+          {/* Section: Order Management */}
+          <section className="space-y-4 pt-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2">
+              <Settings2 size={14} /> Management
+            </h3>
 
-          {/* Section: Shipping Action */}
-          <div className="space-y-4">
-            <p className="text-sm font-semibold">Order Management</p>
+            <div className="rounded-2xl border-2 border-dashed border-slate-200/80 p-6 space-y-6">
+              {!allowActions && (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Tracking Number</p>
+                  <div className="p-3 bg-white border border-slate-200 rounded-xl font-mono text-sm font-bold text-slate-700">
+                    {detail?.receiptNo || "NOT_SHIPPED_YET"}
+                  </div>
+                </div>
+              )}
 
-            {!allowActions && (
-              <InfoRow label="Receipt Number" value={detail?.receiptNo} />
-            )}
-
-            {allowActions && (
-              <div className="space-y-4">
-                {isPaid && (
-                  <Button
-                    className="w-full"
-                    onClick={handleMarkProcessing}
-                    disabled={updateOrder.isPending}
-                  >
-                    Process Order
-                  </Button>
-                )}
-
-                {isProcessing && (
-                  <form onSubmit={handleSubmitReceipt} className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="receiptNo">Input Receipt (Resi)</Label>
-                      <Input
-                        id="receiptNo"
-                        value={receiptNo}
-                        onChange={(e) => setReceiptNo(e.target.value)}
-                        placeholder="e.g. JNE12345678"
-                      />
-                    </div>
+              {allowActions && (
+                <div className="space-y-4">
+                  {isPaid && (
                     <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={!receiptNo || updateOrder.isPending}
+                      className="w-full h-12 rounded-xl bg-slate-900 hover:bg-black font-black uppercase text-[10px] tracking-widest transition-all active:scale-95"
+                      onClick={handleMarkProcessing}
+                      disabled={updateOrder.isPending}
                     >
-                      Ship Order
+                      {updateOrder.isPending ? <Loader2 className="animate-spin mr-2" size={14} /> : <Zap size={14} className="mr-2" />}
+                      Confirm & Process Order
                     </Button>
-                  </form>
-                )}
+                  )}
 
-                {isShipped && (
-                  <Button
-                    variant="outline"
-                    className="w-full border-emerald-500 text-emerald-600"
-                    onClick={() => markDelivered.mutate(orderId!)}
-                    disabled={markDelivered.isPending}
-                  >
-                    Mark as Delivered
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+                  {isProcessing && (
+                    <form onSubmit={handleSubmitReceipt} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="receiptNo" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Shipping Receipt (Resi)</Label>
+                        <Input
+                          id="receiptNo"
+                          value={receiptNo}
+                          onChange={(e) => setReceiptNo(e.target.value)}
+                          placeholder="E.g: JNE123456789"
+                          className="h-12 rounded-xl border-slate-200 focus:ring-4 focus:ring-primary/5 font-bold uppercase placeholder:text-slate-300"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        className="w-full h-12 rounded-xl bg-primary font-black uppercase text-[10px] tracking-widest"
+                        disabled={!receiptNo || updateOrder.isPending}
+                      >
+                        Dispatch & Ship Order
+                      </Button>
+                    </form>
+                  )}
+
+                  {isShipped && (
+                    <Button
+                      variant="outline"
+                      className="w-full h-12 rounded-xl border-2 border-emerald-500 text-emerald-600 font-black uppercase text-[10px] tracking-widest hover:bg-emerald-50 transition-all"
+                      onClick={() => markDelivered.mutate(orderId!)}
+                      disabled={markDelivered.isPending}
+                    >
+                      Mark as Successfully Delivered
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
         </div>
 
+        {/* Loading Overlay */}
         {isFetching && (
-          <div className="flex justify-center p-4">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-50 flex items-center justify-center">
+            <div className="p-4 bg-white rounded-2xl shadow-xl flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span className="text-xs font-black uppercase tracking-widest">Refreshing Data...</span>
+            </div>
           </div>
         )}
       </SheetContent>

@@ -16,6 +16,7 @@ export type OrderItem = {
 export type OrderRow = {
     id: string;
     orderNumber: string;
+    userName: string;
     status: string;
     paymentStatus: string;
     subtotalPrice: number;
@@ -26,6 +27,8 @@ export type OrderRow = {
     snapToken?: string | null;
     snapRedirectUrl?: string | null;
     items?: OrderItem[]; // Optional karena di Go pakai omitempty
+    address?: OrderAddressSnapshot;
+    customer?: CustomerOrderResponse;
 };
 
 // Sesuai dengan type OrderDetailResponse di Go
@@ -42,6 +45,7 @@ export type OrderDetail = {
     updatedAt?: string | Date | undefined | null;
     customer: CustomerOrderResponse;
     items: OrderItem[];
+    address: OrderAddressSnapshot;
 };
 
 // Sesuai dengan type ListOrderResponse di Go
@@ -58,6 +62,19 @@ export type UpdateOrderPayload = {
 
 export type CustomerOrderResponse = {
     email: string;
-    firstName: string;
-    lastName: string;
+    name: string;
 }
+
+
+export type OrderAddressSnapshot = {
+    id: string;
+    label: string;
+    recipientName: string;
+    recipientPhone: string;
+    street: string;
+    subdistrict?: string | null;
+    district?: string | null;
+    city?: string | null;
+    province?: string | null;
+    postalCode?: string | null;
+};

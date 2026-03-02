@@ -62,6 +62,7 @@ export async function updateOrder(
         payload,
         { method: "PATCH" }
     );
+    console.log({ envelope })
 
     return {
         ...envelope,
@@ -76,8 +77,8 @@ export async function updateOrder(
 
 export async function markOrderDelivered(id: string) {
     const envelope = await apiRequest<OrderDetail>(
-        `/admin/orders/${id}/delivered`,
-        undefined,
+        `/admin/orders/${id}/status`,
+        { nextStatus: "DELIVERED" },
         { method: "PATCH" }
     );
 
