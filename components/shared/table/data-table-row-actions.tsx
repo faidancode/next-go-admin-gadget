@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle, Eye, Pencil, Trash2, X } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle, Eye, Pencil, Trash2, X } from "lucide-react";
 
 import Link from "next/link";
 
@@ -42,106 +42,75 @@ export function DataTableRowActions({
   showApproval = false,
 }: DataTableRowActions) {
   return (
-    <div className="flex gap-2">
-      {/* View Button */}
+    <div className="flex items-center gap-1.5">
       {showView && (
         <Link href={`/${menu}/${id}`}>
-          <Button variant="outline" size="sm" className="text-blue-700">
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all">
             <Eye size={14} />
           </Button>
         </Link>
       )}
 
-      {/* Edit Button */}
       {showEdit && (
-        onEdit ? (
-          <Button variant="outline" size="sm" onClick={() => onEdit(id)}>
-            <Pencil size={14} />
-          </Button>
-        ) : (
-          <Link href={`/${menu}/${id}`}>
-            <Button variant="outline" size="sm">
-              <Pencil size={14} />
-            </Button>
-          </Link>
-        )
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onEdit?.(id)}
+          className="h-8 w-8 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
+        >
+          <Pencil size={14} />
+        </Button>
       )}
 
-      {/* Approval Button (Opsional) */}
+      {(showApproval || showDelete) && (
+        <div className="w-px h-4 bg-slate-100 mx-1" />
+      )}
+
       {showApproval && onApprove && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button
-              size="sm"
-              className="bg-green-600 text-white"
-            >
-              <CheckCircle size={14} className="text-white" />
-              Approve
+            <Button size="sm" className="h-8 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-100 transition-all active:scale-95">
+              <CheckCircle size={12} className="mr-1.5" /> Approve
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-8">
             <AlertDialogHeader>
-              <div className="flex gap-1 mb-2">
-                <AlertCircle className="text-green-500" />
-                <AlertDialogTitle className="font-semibold text-green-600">
-                  Confirmation
-                </AlertDialogTitle>
+              <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
+                <CheckCircle size={24} />
               </div>
-              <AlertDialogDescription className="mt-2">
-                Are you sure you want to approve{" "}
-                <span className="font-bold text-black">{entityName}</span>?
+              <AlertDialogTitle className="text-xl font-black uppercase tracking-tight">Confirm Approval</AlertDialogTitle>
+              <AlertDialogDescription className="text-slate-500 font-medium">
+                Are you sure you want to approve <span className="text-slate-900 font-bold">"{entityName}"</span>? This action will update the status immediately.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                <X className="mr-2" size={16} />
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-green-500 hover:bg-green-600"
-                onClick={() => onApprove(id)}
-              >
-                <CheckCircle className="mr-2" size={16} />
-                Approve
-              </AlertDialogAction>
+            <AlertDialogFooter className="mt-6 gap-3">
+              <AlertDialogCancel className="rounded-xl font-bold uppercase text-[10px] tracking-widest border-slate-100">Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onApprove(id)} className="rounded-xl font-bold uppercase text-[10px] tracking-widest bg-emerald-500 hover:bg-emerald-600">Proceed</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       )}
 
-      {/* Delete Button (Opsional) */}
       {showDelete && onDelete && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="outline" size="sm" className="text-red-600">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all">
               <Trash2 size={14} />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-8">
             <AlertDialogHeader>
-              <div className="flex gap-1 mb-2">
-                <AlertCircle className="text-red-500" />
-                <AlertDialogTitle className="font-semibold text-red-600">
-                  Confirmation
-                </AlertDialogTitle>
+              <div className="h-12 w-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center mb-4">
+                <AlertTriangle size={24} />
               </div>
-              <AlertDialogDescription className="mt-2">
-                Are you sure you want to delete{" "}
-                <span className="font-bold text-black">{entityName}</span>?
+              <AlertDialogTitle className="text-xl font-black uppercase tracking-tight">Delete Record</AlertDialogTitle>
+              <AlertDialogDescription className="text-slate-500 font-medium">
+                You are about to delete <span className="text-slate-900 font-bold">"{entityName}"</span>. This action is permanent and cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                <X className="mr-2" size={16} />
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-red-500 hover:bg-red-600"
-                onClick={() => onDelete(id)}
-              >
-                <Trash2 className="mr-2" size={16} />
-                Delete
-              </AlertDialogAction>
+            <AlertDialogFooter className="mt-6 gap-3">
+              <AlertDialogCancel className="rounded-xl font-bold uppercase text-[10px] tracking-widest border-slate-100">Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onDelete(id)} className="rounded-xl font-bold uppercase text-[10px] tracking-widest bg-red-500 hover:bg-red-600">Delete Forever</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

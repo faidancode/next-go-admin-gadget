@@ -4,8 +4,7 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
-  SortingState,
-  useReactTable,
+  useReactTable
 } from "@tanstack/react-table";
 
 import {
@@ -16,8 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ArrowDown, ArrowUp, ArrowUpDown, SearchX } from "lucide-react";
 import { DataTablePagination } from "./data-table-pagination";
-import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -51,11 +51,11 @@ export function DataTable<TData, TValue>({
     state: {
       sorting: sort
         ? [
-            {
-              id: sort.split(":")[0],
-              desc: sort.split(":")[1] === "desc",
-            },
-          ]
+          {
+            id: sort.split(":")[0],
+            desc: sort.split(":")[1] === "desc",
+          },
+        ]
         : [],
     },
     onSortingChange: (updater) => {
@@ -75,67 +75,68 @@ export function DataTable<TData, TValue>({
     },
   });
   return (
-    <div className="rounded-md border bg-white">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
+    <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden transition-all duration-300">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader className="bg-slate-50/50">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent border-slate-100">
+                {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className={
-                      header.column.getCanSort()
-                        ? "cursor-pointer"
-                        : "cursor-default text-muted-foreground"
-                    }
+                    className={cn(
+                      "h-12 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition-colors",
+                      header.column.getCanSort() ? "cursor-pointer hover:text-primary" : "cursor-default"
+                    )}
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div className="flex items-center gap-1">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-
-                      {header.column.getIsSorted() === "asc" && (
-                        <ArrowUp className="w-4 h-4" />
-                      )}
-                      {header.column.getIsSorted() === "desc" && (
-                        <ArrowDown className="w-4 h-4" />
-                      )}
-                      {!header.column.getIsSorted() && (
-                        <ArrowUpDown className="w-4 h-4 opacity-40" />
+                    <div className="flex items-center gap-2">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getCanSort() && (
+                        <div className="flex flex-col">
+                          {header.column.getIsSorted() === "asc" ? (
+                            <ArrowUp size={12} className="text-primary" />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowDown size={12} className="text-primary" />
+                          ) : (
+                            <ArrowUpDown size={12} className="opacity-20" />
+                          )}
+                        </div>
                       )}
                     </div>
                   </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getCoreRowModel().rows?.length ? (
-            table.getCoreRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="group border-slate-50 hover:bg-slate-50/50 transition-colors"
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="px-4 py-3 text-xs font-medium text-slate-600">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-32 text-center">
+                  <div className="flex flex-col items-center justify-center text-slate-400 gap-2">
+                    <SearchX size={32} strokeWidth={1.5} />
+                    <p className="text-xs font-bold uppercase tracking-widest">No matching records found</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
       <DataTablePagination
         table={table}
         page={page}

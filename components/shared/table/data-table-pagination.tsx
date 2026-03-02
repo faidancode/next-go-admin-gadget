@@ -39,124 +39,83 @@ export function DataTablePagination<TData>({
   const canPreviousPage = page > 1 ? true : false;
   const canNextPage = page < totalPages ? true : false;
   return (
-    <div>
-      {totalPages > 0 ? (
-        <div className="flex items-center justify-between p-2 border-t bg-gray-50">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                // table.setPageSize(Number(value));
-                // Call prop if available
-                if (setPageSize) {
-                  setPageSize(Number(value));
-                  if (setPage) {
-                    setPage(1);
-                  }
-                }
-              }}
-            >
-              <SelectTrigger className="h-8 w-17.5">
-                <SelectValue
-                  placeholder={table.getState().pagination.pageSize}
-                />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {[10, 25, 50, 100].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
-                    {pageSize}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center space-x-6 lg:space-x-8">
-            <div className="flex w-45 items-center justify-center text-sm font-medium">
-              Page {page} of {totalPages}
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => {
-                  if (table) {
-                    table.setPageIndex(0);
-                    if (setPage) {
-                      setPage(1);
-                    }
-                  }
-                }}
-                disabled={!canPreviousPage}
-              >
-                <span className="sr-only">Go to first page</span>
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  table.previousPage();
-                  if (setPage) {
-                    setPage(page - 1);
-                  }
-                }}
-                disabled={!canPreviousPage}
-              >
-                <span className="sr-only">Go to previous page</span>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Input
-                min={1}
-                max={totalPages}
-                type="number"
-                // defaultValue={table.getState().pagination.pageIndex + 1}
-                onChange={(e) => {
-                  const page = e.target.value ? Number(e.target.value) : 1;
-                  if (setPage) {
-                    setPage(Number(page));
-                  }
-                }}
-                value={page}
-                className="border rounded w-16 text-center"
-              />
-              <Button
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  table.nextPage();
-                  if (setPage) {
-                    setPage(page + 1);
-                  }
-                }}
-                disabled={!canNextPage}
-              >
-                <span className="sr-only">Go to next page</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => {
-                  if (table) {
-                    table.setPageIndex(table.getPageCount() - 1);
-                    if (setPage) {
-                      setPage(Number(totalPages));
-                    }
-                  }
-                }}
-                disabled={!canNextPage}
-              >
-                <span className="sr-only">Go to last page</span>
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Show</p>
+          <Select
+            value={String(pageSize)}
+            onValueChange={(v) => {
+              setPageSize?.(Number(v));
+              setPage?.(1);
+            }}
+          >
+            <SelectTrigger className="h-8 w-[70px] rounded-lg border-slate-200 bg-white font-bold text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+              {[10, 25, 50].map((size) => (
+                <SelectItem key={size} value={`${size}`} className="text-xs font-bold">{size}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      ) : (
-        <div className="flex items-center justify-between p-2 border-t bg-gray-50" />
-      )}
+        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest hidden sm:block">
+          Total {totalPages} Pages
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary disabled:opacity-30"
+            onClick={() => setPage?.(1)}
+            disabled={page === 1}
+          >
+            <ChevronsLeft size={14} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary disabled:opacity-30"
+            onClick={() => setPage?.(page - 1)}
+            disabled={page === 1}
+          >
+            <ChevronLeft size={14} />
+          </Button>
+
+          <div className="flex items-center px-3 gap-1">
+            <input
+              type="number"
+              value={page}
+              onChange={(e) => setPage?.(Number(e.target.value))}
+              className="w-8 text-center text-xs font-black text-primary focus:outline-none"
+            />
+            <span className="text-[10px] font-black text-slate-300 uppercase">/ {totalPages}</span>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary disabled:opacity-30"
+            onClick={() => setPage?.(page + 1)}
+            disabled={page >= totalPages}
+          >
+            <ChevronRight size={14} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 rounded-lg text-slate-400 hover:text-primary disabled:opacity-30"
+            onClick={() => setPage?.(totalPages)}
+            disabled={page >= totalPages}
+          >
+            <ChevronsRight size={14} />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
