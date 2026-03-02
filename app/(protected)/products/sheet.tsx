@@ -14,10 +14,12 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useBrands } from "@/hooks/use-brand";
 import { useCategories } from "@/hooks/use-category";
 import { useCreateProduct, useUpdateProduct } from "@/hooks/use-product";
@@ -29,6 +31,7 @@ import {
   type ProductFormValues,
 } from "@/lib/validations/product-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Edit3, ImagePlus, Loader2, Plus } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -168,217 +171,221 @@ export function ProductSheet() {
 
   return (
     <Sheet open={open} onOpenChange={(state) => !state && handleClose()}>
-      <SheetContent className="w-full sm:max-w-md p-4 overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>
-            {mode === "create" ? "Add Product" : "Edit Product"}
-          </SheetTitle>
+      {/* Menggunakan max-w-xl agar lebih luas untuk input grid */}
+      <SheetContent className="w-full sm:max-w-xl p-0 overflow-hidden flex flex-col border-l border-slate-100">
+        <SheetHeader className="p-8 border-b border-slate-100 bg-white">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+              {isEditMode ? <Edit3 size={24} /> : <Plus size={24} />}
+            </div>
+            <div>
+              <SheetTitle className="text-xl font-black tracking-tight uppercase">
+                {isEditMode ? "Edit Product" : "New Product"}
+              </SheetTitle>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                {isEditMode ? `ID: ${editingId}` : "Fill in the details to list a new item"}
+              </p>
+            </div>
+          </div>
         </SheetHeader>
 
         <form
-          className="mt-6 space-y-4"
+          className="flex-1 overflow-y-auto"
           onSubmit={(e) => {
             void form.handleSubmit(onSubmit)(e);
           }}
         >
-          {submitError && <Alert variant="error">{submitError}</Alert>}
-
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <Select
-              value={selectedCategoryId || undefined}
-              onValueChange={(value) =>
-                setValue("categoryId", value, { shouldValidate: true })
-              }
-              disabled={isSubmitting}
-            >
-              <SelectTrigger
-                className={cn("w-full", errors.categoryId && "border-red-600")}
-              >
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.categoryId && (
-              <p className="text-sm text-red-600">
-                {errors.categoryId.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Brand</Label>
-            <Select
-              value={selectedBrandId || undefined}
-              onValueChange={(value) =>
-                setValue("brandId", value, { shouldValidate: true })
-              }
-              disabled={isSubmitting}
-            >
-              <SelectTrigger
-                className={cn("w-full", errors.brandId && "border-red-600")}
-              >
-                <SelectValue placeholder="Select brand" />
-              </SelectTrigger>
-              <SelectContent>
-                {brands.map((brand) => (
-                  <SelectItem key={brand.id} value={brand.id}>
-                    {brand.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.brandId && (
-              <p className="text-sm text-red-600">{errors.brandId.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              placeholder="Product name"
-              {...form.register("name")}
-              className={cn(errors.name && "border-red-600")}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-600">{errors.name.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              placeholder="Product description"
-              {...form.register("description")}
-              className={cn(errors.description && "border-red-600")}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-600">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                min={1}
-                placeholder="0"
-                {...form.register("price", { valueAsNumber: true })}
-                className={cn(errors.price && "border-red-600")}
-              />
-              {errors.price && (
-                <p className="text-sm text-red-600">{errors.price.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stock">Stock</Label>
-              <Input
-                id="stock"
-                type="number"
-                min={0}
-                placeholder="0"
-                {...form.register("stock", { valueAsNumber: true })}
-                className={cn(errors.stock && "border-red-600")}
-              />
-              {errors.stock && (
-                <p className="text-sm text-red-600">{errors.stock.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="sku">SKU</Label>
-            <Input
-              id="sku"
-              placeholder="SKU"
-              {...form.register("sku")}
-              className={cn(errors.sku && "border-red-600")}
-            />
-            {errors.sku && (
-              <p className="text-sm text-red-600">{errors.sku.message}</p>
-            )}
-          </div>
-
-          {isEditMode && (
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <Label htmlFor="is-active-switch">Active</Label>
-              <Switch
-                id="is-active-switch"
-                checked={Boolean(activeValue)}
-                onCheckedChange={(checked) =>
-                  setValue("isActive", checked, {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  })
-                }
-                disabled={isSubmitting}
-              />
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label>Product Image</Label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded border border-dashed bg-muted/50">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-center text-xs text-muted-foreground">
-                    No image
-                  </span>
-                )}
+          <div className="p-8 space-y-8">
+            {submitError && (
+              <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-[11px] font-bold flex items-center gap-3 animate-in fade-in zoom-in-95">
+                <AlertCircle size={18} /> {submitError}
               </div>
-              <div className="flex-1 space-y-2">
+            )}
+
+            {/* SECTION: BASIC INFO */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 pb-2">
+                Identity & Classification
+              </h3>
+
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Product Name</Label>
                 <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  disabled={isSubmitting}
+                  id="name"
+                  placeholder="e.g. iPhone 15 Pro Max"
+                  {...form.register("name")}
+                  className={cn(
+                    "h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white transition-all",
+                    errors.name && "border-red-500 focus:ring-red-100"
+                  )}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {isEditMode
-                    ? "Upload new image to replace current one."
-                    : "Upload product image."}
-                </p>
+                {errors.name && <p className="text-[10px] font-bold text-red-500 ml-1 italic">{errors.name.message}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Category</Label>
+                  <Select
+                    value={selectedCategoryId || undefined}
+                    onValueChange={(value) => setValue("categoryId", value, { shouldValidate: true })}
+                  >
+                    <SelectTrigger className={cn("h-12 rounded-xl border-slate-200 bg-slate-50/50", errors.categoryId && "border-red-500")}>
+                      <SelectValue placeholder="Pick Category" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="rounded-lg">{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Brand</Label>
+                  <Select
+                    value={selectedBrandId || undefined}
+                    onValueChange={(value) => setValue("brandId", value, { shouldValidate: true })}
+                  >
+                    <SelectTrigger className={cn("h-12 rounded-xl border-slate-200 bg-slate-50/50", errors.brandId && "border-red-500")}>
+                      <SelectValue placeholder="Pick Brand" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                      {brands.map((b) => (
+                        <SelectItem key={b.id} value={b.id} className="rounded-lg">{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-2 pt-4">
+            {/* SECTION: PRICING & INVENTORY */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 pb-2">
+                Pricing & Inventory
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Retail Price (IDR)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    {...form.register("price", { valueAsNumber: true })}
+                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stock" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Available Stock</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    {...form.register("stock", { valueAsNumber: true })}
+                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sku" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Stock Keeping Unit (SKU)</Label>
+                <Input
+                  id="sku"
+                  placeholder="GG-PH-15PM-BLK"
+                  {...form.register("sku")}
+                  className="h-12 rounded-xl border-slate-200 bg-slate-50/50 font-mono text-xs"
+                />
+              </div>
+            </div>
+
+            {/* SECTION: ASSETS */}
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-100 pb-2">
+                Product Visuals
+              </h3>
+
+              <div className="flex flex-col gap-6 p-6 rounded-[2rem] border-2 border-dashed border-slate-200/80 bg-slate-50/30">
+                <div className="flex justify-center">
+                  <div className="relative h-40 w-40 rounded-3xl overflow-hidden bg-white shadow-xl border border-slate-100 group">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Preview" className="h-full w-full object-cover transition-transform group-hover:scale-110 duration-500" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                        <ImagePlus size={32} />
+                        <span className="text-[9px] font-black uppercase mt-2">No Image</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    disabled={isSubmitting}
+                    className="rounded-xl border-slate-200 bg-white file:bg-slate-900 file:text-white file:rounded-lg file:text-[10px] file:font-black file:uppercase file:px-4 file:mr-4 file:border-0 hover:file:bg-primary cursor-pointer h-11 flex items-center"
+                  />
+                  <p className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                    Recommended: Square aspect ratio, max 2MB
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION: DESCRIPTION */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Full Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Write detailed specifications..."
+                {...form.register("description")}
+                className="min-h-[120px] rounded-2xl border-slate-200 bg-slate-50/50 focus:bg-white transition-all resize-none p-4"
+              />
+            </div>
+
+            {isEditMode && (
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className={cn("h-2 w-2 rounded-full animate-pulse", activeValue ? "bg-emerald-400" : "bg-slate-500")} />
+                  <Label htmlFor="is-active" className="text-[10px] font-black uppercase tracking-widest">Visibility Status</Label>
+                </div>
+                <Switch
+                  id="is-active"
+                  checked={Boolean(activeValue)}
+                  onCheckedChange={(checked) => setValue("isActive", checked, { shouldDirty: true })}
+                  className="data-[state=checked]:bg-primary"
+                />
+              </div>
+            )}
+          </div>
+        </form>
+
+        <SheetFooter className="p-8 border-t border-slate-200 bg-white">
+          <div className="flex gap-3 w-full">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="flex-1"
+              className="flex-1 h-12 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting
-                ? "Saving..."
-                : isEditMode
-                  ? "Update Product"
-                  : "Create Product"}
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              className="flex-2 h-12 rounded-xl bg-slate-900 hover:bg-primary text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-slate-200"
+            >
+              {isSubmitting ? (
+                <Loader2 className="animate-spin mr-2" size={16} />
+              ) : isEditMode ? (
+                "Update Product"
+              ) : (
+                "Create Product"
+              )}
             </Button>
           </div>
-        </form>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
