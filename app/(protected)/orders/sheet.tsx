@@ -19,7 +19,7 @@ import {
 } from "@/hooks/use-order";
 import { useOrderSheet } from "@/hooks/use-order-sheet";
 import { Box, ImageIcon, Loader2, Package, Settings2, StickyNote, User, Zap } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import Image from "next/image";
 import { DefaultImage } from "@/components/shared/default-image";
 import { OrderDetail, OrderItem } from "@/types/order";
@@ -35,11 +35,7 @@ const formatCurrency = (value?: number | null) => {
   }).format(Number(value));
 };
 
-const formatDate = (value?: Date | string | null) => {
-  if (!value) return "-";
-  const date = typeof value === "string" ? new Date(value) : value;
-  return date.toLocaleString("id-ID");
-};
+
 
 function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
   return (
